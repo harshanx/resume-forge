@@ -48,10 +48,7 @@ export default function Home() {
       <Navbar />
       <main>
         <section className="mx-auto max-w-6xl px-5 pb-20 pt-24 text-center sm:px-8 sm:pb-28 sm:pt-32">
-          <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-[#f5f5f7] px-3 py-1.5 text-xs font-medium tracking-[-0.01em] text-[#6e6e73] dark:border-white/[0.12] dark:bg-[#121212] dark:text-[#a1a1a6]">
-            <span className="h-1.5 w-1.5 rounded-full bg-black dark:bg-white" />
-            LaTeX Engine 2.0 <span className="text-[#86868b]">•</span> ATS Compliant <span className="text-[#86868b]">•</span> Single Page Guaranteed
-          </p>
+
           <h1 className="mx-auto mt-7 max-w-4xl text-5xl font-semibold leading-[1.08] tracking-tight text-premium-gold sm:text-6xl md:text-7xl">A resume that gets out of your way.</h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[#6e6e73] md:text-xl dark:text-[#a1a1a6]">Turn your experience into a focused, ATS-ready resume. Built for clear thinking, quick tailoring, and a polished final PDF.</p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
