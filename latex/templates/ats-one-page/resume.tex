@@ -98,11 +98,13 @@
 
 [[ exp.company ]]
 
+[% if exp.bullets %]
 \begin{itemize}
 [% for bullet in exp.bullets %]
 \item [[ bullet ]]
 [% endfor %]
 \end{itemize}
+[% endif %]
 
 [% if not loop.last %]\vspace{4pt}[% endif %]
 [% endfor %]
@@ -115,11 +117,13 @@
 {\bfseries [[ project.name ]]} \hfill [[ project.technologies ]]
 [% if project.github_url %][[ project.github_url ]][% endif %]
 
+[% if project.bullets %]
 \begin{itemize}
 [% for bullet in project.bullets %]
 \item [[ bullet ]]
 [% endfor %]
 \end{itemize}
+[% endif %]
 
 [% if not loop.last %]\vspace{4pt}[% endif %]
 [% endfor %]

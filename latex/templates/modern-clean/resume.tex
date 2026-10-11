@@ -108,11 +108,13 @@
 {\normalsize [[ exp.company ]]}
 
 \vspace{2pt}
+[% if exp.bullets %]
 \begin{itemize}
 [% for bullet in exp.bullets %]
 \item [[ bullet ]]
 [% endfor %]
 \end{itemize}
+[% endif %]
 
 [% if not loop.last %]\vspace{6pt}[% endif %]
 [% endfor %]
@@ -126,11 +128,13 @@
 [% if project.github_url %] {\small [[ project.github_url ]]}[% endif %]
 
 \vspace{2pt}
+[% if project.bullets %]
 \begin{itemize}
 [% for bullet in project.bullets %]
 \item [[ bullet ]]
 [% endfor %]
 \end{itemize}
+[% endif %]
 
 [% if not loop.last %]\vspace{6pt}[% endif %]
 [% endfor %]
