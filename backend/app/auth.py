@@ -1,55 +1,36 @@
-from typing import Optional
-import os
-import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from dotenv import load_dotenv
+from supabase import Client
 
-load_dotenv()
+from app.database import get_db
 
-# Supabase Configuration
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
 
 security = HTTPBearer()
 
 
-def decode_supabase_token(token: str) -> dict:
-    """Decode and verify a Supabase JWT token."""
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Client = Depends(get_db),
+) -> dict:
+    """Validate the access token with Supabase and return its user details."""
     try:
-        # Supabase uses RS256 by default
-        # If you have the JWT secret, you can decode it
-        # Otherwise, you'd need to verify with Supabase's public key
-        payload = jwt.decode(
-            token,
-            SUPABASE_JWT_SECRET if SUPABASE_JWT_SECRET else "",
-            algorithms=["HS256"],
-            options={"verify_signature": False}  # For development only
-        )
-        return payload
-    except jwt.ExpiredSignatureError:
+        response = db.auth.get_user(credentials.credentials)
+        user = response.user
+    except Exception:
+        # Never trust claims decoded from a token until Supabase validates it.
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-        )
-    except jwt.InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
+            detail="Invalid or expired token",
         )
 
-
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """Get the current user from the Supabase JWT token."""
-    token = credentials.credentials
-    payload = decode_supabase_token(token)
-    
-    user_id: str = payload.get("sub")
-    email: str = payload.get("email")
-    
-    if user_id is None:
+    if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
+            detail="Invalid or expired token",
         )
-    return {"user_id": user_id, "email": email}
+
+    return {
+        "user_id": user.id,
+        "email": user.email,
+        "user_metadata": user.user_metadata or {},
+    }
