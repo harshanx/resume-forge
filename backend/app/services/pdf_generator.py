@@ -16,7 +16,12 @@ class PDFGenerator:
             temp_dir = os.path.join(os.path.dirname(__file__), '../../temp')
         self.temp_dir = temp_dir
         os.makedirs(temp_dir, exist_ok=True)
-        self.use_latex = self._check_pdflatex()
+        # LaTeX can exceed the memory limit of small free-tier containers.
+        # Allow deployments to select the lower-memory ReportLab renderer.
+        self.use_latex = (
+            None if os.getenv("PDF_ENGINE", "auto").strip().lower() == "reportlab"
+            else self._check_pdflatex()
+        )
 
     def _check_pdflatex(self) -> bool:
         """Check if pdflatex is available."""
@@ -41,7 +46,7 @@ class PDFGenerator:
         if self.use_latex:
             return self._compile_with_latex(latex_code, output_filename)
         else:
-            print("pdflatex not found, using reportlab fallback")
+            print("Using ReportLab PDF renderer")
             if resume_data:
                 return self._generate_pdf_from_data(resume_data)
             return self._compile_with_reportlab(latex_code, output_filename)
