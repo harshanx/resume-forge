@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic[email]
+pydantic-settings
+python-multipart
+jinja2
+pypdf
+reportlab
+python-jose[cryptography]
+passlib[bcrypt]
+supabase
+python-dotenv
+psycopg2-binary

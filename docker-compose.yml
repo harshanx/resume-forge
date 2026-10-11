@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: resumeforge-backend
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: your-secret-key-change-in-production
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+    volumes:
+      - ./backend:/app
+      - ./latex:/app/latex
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  latex-compiler:
+    build:
+      context: ./docker/latex
+      dockerfile: Dockerfile
+    container_name: resumeforge-latex
+    volumes:
+      - ./latex:/workspace/latex
+      - ./backend/temp:/workspace/temp
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: resumeforge-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    depends_on:
+      - backend

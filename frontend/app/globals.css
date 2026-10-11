@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --page-background: #ffffff;
+  --surface: #f5f5f7;
+  --border: rgba(0, 0, 0, 0.08);
+  --foreground: #1d1d1f;
+  --secondary: #6e6e73;
+  --tertiary: #86868b;
+  --action: #000000;
+  --action-foreground: #ffffff;
+}
+
+.dark {
+  --page-background: #000000;
+  --surface: #121212;
+  --border: rgba(255, 255, 255, 0.12);
+  --foreground: #f5f5f7;
+  --secondary: #a1a1a6;
+  --tertiary: #6e6e73;
+  --action: #ffffff;
+  --action-foreground: #000000;
+}
+
+@layer base {
+  * { @apply border-black/[0.08] dark:border-white/[0.12]; }
+
+  body {
+    @apply min-h-screen bg-white font-sans text-[#1d1d1f] antialiased transition-colors duration-300 dark:bg-black dark:text-[#f5f5f7];
+  }
+
+  button, a, input, textarea, select { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/30 dark:focus-visible:ring-white/30; }
+
+  input, textarea, select {
+    @apply bg-white text-[#1d1d1f] dark:bg-[#161617] dark:text-[#f5f5f7];
+  }
+
+}
+
+/* Keep legacy Tailwind accent classes visually consistent while preserving their behavior. */
+.dark .bg-white { background-color: #121212; }
+.dark .bg-gray-50, .dark .bg-blue-50, .dark .bg-indigo-50, .dark .bg-purple-50 { background-color: #121212; }
+.dark .bg-gray-100, .dark .bg-blue-100, .dark .bg-indigo-100, .dark .bg-purple-100 { background-color: #161617; }
+.dark .bg-gray-200 { background-color: #242426; }
+.dark .text-gray-900, .dark .text-gray-800, .dark .text-gray-700 { color: #f5f5f7; }
+.dark .text-gray-600, .dark .text-gray-500, .dark .text-gray-400 { color: #a1a1a6; }
+.dark .border-gray-300, .dark .border-gray-200, .dark .border-gray-100 { border-color: rgba(255, 255, 255, 0.12); }
+.dark .bg-red-50 { background-color: #241212; }
+.dark .text-red-600, .dark .text-red-700, .dark .text-red-800 { color: #ff9b9b; }
+.dark .border-red-200 { border-color: rgba(255, 155, 155, 0.28); }
+.dark .bg-yellow-50 { background-color: #211d12; }
+.dark .text-yellow-800 { color: #f0d99b; }
+.dark .border-yellow-200 { border-color: rgba(240, 217, 155, 0.25); }
+.resume-paper { background-color: #ffffff; color: #111827; }
+.dark .resume-paper { background-color: #ffffff; color: #111827; }
+.dark .resume-paper .text-gray-900,
+.dark .resume-paper .text-gray-800,
+.dark .resume-paper .text-gray-700 { color: #111827; }
+.dark .resume-paper .text-gray-600,
+.dark .resume-paper .text-gray-500,
+.dark .resume-paper .text-gray-400 { color: #4b5563; }
+.bg-gradient-to-br, .bg-gradient-to-r { background-image: none !important; background-color: var(--surface) !important; }
+.bg-blue-50, .bg-indigo-50, .bg-purple-50, .bg-gray-50 { background-color: var(--surface); }
+.bg-blue-100, .bg-indigo-100, .bg-purple-100, .bg-gray-100 { background-color: #eeeeF0; }
+.text-blue-600, .text-blue-700, .text-blue-800, .text-indigo-600, .text-indigo-700, .text-indigo-800, .text-purple-600, .text-purple-700, .text-purple-800, .text-green-600, .text-green-700 { color: var(--foreground); }
+.border-blue-100, .border-blue-200, .border-blue-300, .border-indigo-100, .border-indigo-200 { border-color: var(--border); }
+.bg-blue-600, .bg-indigo-600, .bg-purple-600, .bg-green-600, .bg-primary-600 { background-color: var(--action); color: var(--action-foreground); }
+.hover\:bg-blue-700:hover, .hover\:bg-indigo-700:hover, .hover\:bg-purple-700:hover, .hover\:bg-green-700:hover, .hover\:bg-primary-700:hover { background-color: color-mix(in srgb, var(--action) 84%, var(--action-foreground)); }
+.hover\:bg-blue-50:hover, .hover\:bg-blue-200:hover, .hover\:bg-gray-200:hover { background-color: #e8e8eb; }
+.shadow-sm, .shadow-md, .shadow-lg, .hover\:shadow-lg:hover { box-shadow: none !important; }
+.rounded-xl.shadow-md, .rounded-2xl.shadow-md { border: 1px solid var(--border); }
+.dark .bg-blue-50, .dark .bg-indigo-50, .dark .bg-purple-50, .dark .bg-gray-50 { background-color: #121212; }
+.dark .bg-blue-100, .dark .bg-indigo-100, .dark .bg-purple-100, .dark .bg-gray-100 { background-color: #161617; }
+.dark .bg-blue-600, .dark .bg-indigo-600, .dark .bg-purple-600, .dark .bg-green-600, .dark .bg-primary-600 { background-color: #f5f5f7; color: #000000; }
+.dark .hover\:bg-blue-700:hover, .dark .hover\:bg-indigo-700:hover, .dark .hover\:bg-purple-700:hover, .dark .hover\:bg-green-700:hover, .dark .hover\:bg-primary-700:hover { background-color: #d6d6d8; }
+.dark .hover\:bg-blue-50:hover, .dark .hover\:bg-blue-200:hover, .dark .hover\:bg-gray-200:hover { background-color: #242426; }

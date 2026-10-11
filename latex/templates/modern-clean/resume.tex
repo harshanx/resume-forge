@@ -1,0 +1,149 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[margin=0.8in, top=0.7in, bottom=0.7in]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage{fancyhdr}
+
+% Modern clean formatting
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlist[itemize]{nosep, leftmargin=1.2em, itemsep=2pt}
+\setlist[enumerate]{nosep, leftmargin=1.2em}
+
+% Section formatting - modern style
+\titleformat{\section}{\large\bfseries\uppercase}{}{0em}{}[\titlerule]
+\titlespacing{\section}{0pt}{10pt}{8pt}
+
+% Disable hyperref colors for ATS compatibility
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0}
+}
+
+% Custom colors
+\definecolor{primary}{RGB}{70, 130, 180}
+
+% Custom commands for template
+\newcommand{\contactline}[1]{#1}
+
+\begin{document}
+
+% Header Section - Modern Style
+\begin{center}
+    {\Huge\bfseries\color{primary} [[ name ]]}
+    
+    \vspace{6pt}
+    
+    {\large
+    [% if phone %][[ phone ]][% endif %]
+    [% if phone and (email or linkedin or github) %] | [% endif %]
+    [% if email %][[ email ]][% endif %]
+    [% if email and (linkedin or github) %] | [% endif %]
+    [% if linkedin %][[ linkedin ]][% endif %]
+    [% if linkedin and github %] | [% endif %]
+    [% if github %][[ github ]][% endif %]
+    }
+    
+    [% if location %]
+    \vspace{3pt}
+    {\normalsize\color{gray} [[ location ]]}
+    [% endif %]
+\end{center}
+
+\vspace{8pt}
+
+% Education Section
+[% if education %]
+\section{EDUCATION}
+[% for edu in education %]
+{\large\bfseries [[ edu.degree ]][% if edu.specialization %] in [[ edu.specialization ]][% endif %]} \hfill {\large [[ edu.graduation_year ]]}
+
+{\normalsize [[ edu.institution ]]}
+[% if edu.university %] {\small\color{gray} [[ edu.university ]]}[% endif %]
+
+\vspace{2pt}
+{\small
+[% if edu.grade_value and edu.grade_scale == 'percentile' %]Percentile: [[ edu.grade_value ]]%[% elif edu.grade_value %]CGPA: [[ edu.grade_value ]]/[[ edu.grade_scale ]][% else %][% if edu.cgpa %]CGPA: [[ edu.cgpa ]] [% endif %][% if edu.percentage %]Percentage: [[ edu.percentage ]][% endif %][% endif %]
+}
+
+[% if not loop.last %]\vspace{6pt}[% endif %]
+[% endfor %]
+[% endif %]
+
+% Skills Section
+[% if skills %]
+\section{SKILLS}
+[% if skills.technical %]
+{\bfseries Technical Skills:} [[ skills.technical ]]
+
+[% endif %]
+[% if skills.professional %]
+{\bfseries Professional Skills:} [[ skills.professional ]]
+[% endif %]
+[% endif %]
+
+% Certifications Section
+[% if certifications %]
+\section{CERTIFICATIONS}
+[% for cert in certifications %]
+{\large\bfseries [[ cert.name ]]} \hfill {\large [[ cert.date ]]}
+
+{\normalsize [[ cert.organization ]]}
+[% if cert.certificate_id %] {\small\color{gray} ID: [[ cert.certificate_id ]]}[% endif %]
+[% if cert.url %] {\small [[ cert.url ]]}[% endif %]
+
+[% if not loop.last %]\vspace{6pt}[% endif %]
+[% endfor %]
+[% endif %]
+
+% Experience Section
+[% if experience %]
+\section{EXPERIENCE}
+[% for exp in experience %]
+{\large\bfseries [[ exp.job_title ]]} \hfill {\large [[ exp.date ]]}
+
+{\normalsize [[ exp.company ]]}
+
+\vspace{2pt}
+\begin{itemize}
+[% for bullet in exp.bullets %]
+\item [[ bullet ]]
+[% endfor %]
+\end{itemize}
+
+[% if not loop.last %]\vspace{6pt}[% endif %]
+[% endfor %]
+[% endif %]
+
+% Projects Section
+[% if projects %]
+\section{PROJECTS}
+[% for project in projects %]
+{\large\bfseries [[ project.name ]]} \hfill {\large [[ project.technologies ]]}
+[% if project.github_url %] {\small [[ project.github_url ]]}[% endif %]
+
+\vspace{2pt}
+\begin{itemize}
+[% for bullet in project.bullets %]
+\item [[ bullet ]]
+[% endfor %]
+\end{itemize}
+
+[% if not loop.last %]\vspace{6pt}[% endif %]
+[% endfor %]
+[% endif %]
+
+% Achievements Section
+[% if achievements %]
+\section{ACHIEVEMENTS}
+\begin{itemize}
+[% for achievement in achievements %]
+\item [[ achievement ]]
+[% endfor %]
+\end{itemize}
+[% endif %]
+
+\end{document}
