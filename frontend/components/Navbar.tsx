@@ -1,9 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { FileText, Moon, Sun } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { FileText, LogOut, Moon, Sun } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
+import { supabase } from '@/lib/firebase'
+import { getCurrentSessionUser } from '@/lib/auth'
 
 const navigation = [
   { href: '/builder', label: 'Builder' },
@@ -15,12 +18,44 @@ const navigation = [
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme()
   const pathname = usePathname()
+  const router = useRouter()
   const isDark = theme === 'dark'
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
   const authAction = pathname === '/login'
     ? { href: '/register', label: 'Create account' }
     : pathname === '/register'
       ? { href: '/login', label: 'Sign in' }
       : { href: '/builder', label: 'Create resume' }
+
+  useEffect(() => {
+    let active = true
+    getCurrentSessionUser().then((user) => {
+      if (active) setIsAuthenticated(Boolean(user))
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(Boolean(session))
+    })
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const handleLogout = async () => {
+    setIsSigningOut(true)
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      setIsAuthenticated(false)
+      router.replace('/login')
+      router.refresh()
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      setIsSigningOut(false)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-black/[0.06] bg-white/75 backdrop-blur-xl dark:border-white/[0.08] dark:bg-black/75">
@@ -52,6 +87,12 @@ export default function Navbar() {
           <Link href={authAction.href} className="rounded-full bg-black px-4 py-2 text-xs font-medium text-white transition-all hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/30 active:scale-[0.98] dark:bg-white dark:text-black dark:focus-visible:ring-white/30">
             {authAction.label}
           </Link>
+          {isAuthenticated && (
+            <button type="button" onClick={handleLogout} disabled={isSigningOut} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-black/15 px-3 py-2 text-xs font-medium text-[#1d1d1f] transition hover:bg-black/[0.04] disabled:cursor-wait disabled:opacity-60 dark:border-white/20 dark:text-[#f5f5f7] dark:hover:bg-white/[0.05]">
+              <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{isSigningOut ? 'Signing out…' : 'Sign out'}</span>
+            </button>
+          )}
         </div>
       </div>
     </header>

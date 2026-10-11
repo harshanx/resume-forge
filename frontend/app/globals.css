@@ -11,6 +11,7 @@
   --tertiary: #86868b;
   --action: #000000;
   --action-foreground: #ffffff;
+  --premium-gold: #8a681f;
 }
 
 .dark {
@@ -22,7 +23,10 @@
   --tertiary: #6e6e73;
   --action: #ffffff;
   --action-foreground: #000000;
+  --premium-gold: #e0c477;
 }
+
+.text-premium-gold { color: var(--premium-gold); }
 
 @layer base {
   * { @apply border-black/[0.08] dark:border-white/[0.12]; }

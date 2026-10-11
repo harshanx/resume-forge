@@ -171,7 +171,7 @@ export default function ApplicationsPage() {
         <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-medium text-[#6e6e73] dark:text-[#a1a1a6]">Keep momentum between applications</p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">Application tracker</h1>
+            <h1 className="mt-2 text-4xl font-semibold tracking-tight text-premium-gold">Application tracker</h1>
             <p className="mt-2 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Track roles, deadlines, progress, and the resume you sent.</p>
           </div>
           <button onClick={() => { setEditingId(null); setShowForm((visible) => !visible) }} className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-full bg-black px-5 py-3 text-sm font-medium text-white dark:bg-white dark:text-black sm:self-auto"><Plus className="h-4 w-4" />Add application</button>

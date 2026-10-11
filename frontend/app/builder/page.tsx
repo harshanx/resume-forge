@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, ArrowRight, CheckCircle2, Download, Eye, FileSearch, Loader2, SearchCheck, Sparkles, SpellCheck, Save, Wand2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Download, Eye, FileSearch, Loader2, SearchCheck, Sparkles, SpellCheck, Save } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import PersonalInfoForm from '@/components/forms/PersonalInfoForm'
 import EducationForm from '@/components/forms/EducationForm'
@@ -116,9 +116,7 @@ export default function BuilderPage() {
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [aiResults, setAiResults] = useState<any>(null)
   const [atsResults, setAtsResults] = useState<any>(null)
-  const [jobDescription, setJobDescription] = useState('')
-  const [jobAnalysis, setJobAnalysis] = useState<any>(null)
-  const [activeAiTab, setActiveAiTab] = useState<'bullets' | 'grammar' | 'keywords'>('bullets')
+  const [activeAiTab, setActiveAiTab] = useState<'grammar' | 'keywords' | 'ats'>('grammar')
   const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [aiIndustry, setAiIndustry] = useState('')
   const [aiRole, setAiRole] = useState('')
@@ -407,26 +405,6 @@ export default function BuilderPage() {
     }
   }
 
-  const handleImproveBullets = async (bullets: string[]) => {
-    setIsAiProcessing(true)
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const headers = await getAuthHeaders()
-      const response = await fetch(`${apiUrl}/api/resume/improve-bullets`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ bullets }),
-      })
-      const result = await response.json()
-      setAiResults((prev: any) => ({ ...prev, bullets: result }))
-    } catch (error) {
-      console.error('Error improving bullets:', error)
-      alert('Failed to improve bullets')
-    } finally {
-      setIsAiProcessing(false)
-    }
-  }
-
   const handleCheckGrammar = async () => {
     setIsAiProcessing(true)
     try {
@@ -487,58 +465,9 @@ export default function BuilderPage() {
     }
   }
 
-  const openAiTool = (tab: 'bullets' | 'grammar' | 'keywords', target = 'ai-tools-panel') => {
+  const openAiTool = (tab: 'grammar' | 'keywords' | 'ats') => {
     setActiveAiTab(tab)
     setShowAdvanced(true)
-    window.setTimeout(() => {
-      document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 80)
-  }
-
-  const applyRoleTemplate = (industry: string, role: string) => {
-    setAiIndustry(industry)
-    setAiRole(role)
-    openAiTool('keywords')
-  }
-
-  const handleAnalyzeJob = async (jobDescription: string) => {
-    setIsAiProcessing(true)
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const headers = await getAuthHeaders()
-      const response = await fetch(`${apiUrl}/api/resume/analyze-job`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ job_description: jobDescription }),
-      })
-      const result = await response.json()
-      setJobAnalysis(result)
-    } catch (error) {
-      console.error('Error analyzing job:', error)
-      alert('Failed to analyze job description')
-    } finally {
-      setIsAiProcessing(false)
-    }
-  }
-
-  const handleCompareWithJob = async (jobDescription: string) => {
-    setIsAiProcessing(true)
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const headers = await getAuthHeaders()
-      const response = await fetch(`${apiUrl}/api/resume/compare-job`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ job_description: jobDescription, resume_data: resumeData }),
-      })
-      const result = await response.json()
-      setJobAnalysis((prev: any) => ({ ...prev, comparison: result }))
-    } catch (error) {
-      console.error('Error comparing with job:', error)
-      alert('Failed to compare with job description')
-    } finally {
-      setIsAiProcessing(false)
-    }
   }
 
   const renderStep = () => {
@@ -617,7 +546,7 @@ export default function BuilderPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="shrink-0">
-              <h1 className="text-2xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">Resume builder</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-premium-gold">Resume builder</h1>
               <p className="mt-1 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Build, preview, and save your next application.</p>
               <p role="status" className="mt-1 text-xs text-[#86868b] dark:text-[#6e6e73]">
                 {draftState === 'saving' ? 'Saving draft on this device…' : draftState === 'saved' ? 'Draft saved on this device' : draftState === 'restored' ? 'Your draft was restored' : draftState === 'error' ? 'Local draft could not be saved' : saveMessage}
@@ -727,448 +656,63 @@ export default function BuilderPage() {
         </div>
       </div>
 
-      {/* AI tools are surfaced here so writers can find them before completing the full form. */}
-      <section aria-labelledby="builder-ai-shortcuts-title" className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      {/* Focused AI toolkit */}
+      <section aria-labelledby="builder-ai-title" className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
         <div className="rounded-3xl border border-black/[0.08] bg-[#f5f5f7] p-5 dark:border-white/[0.1] dark:bg-[#121212] sm:p-6">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-[#86868b] dark:text-[#a1a1a6]"><Sparkles className="h-3.5 w-3.5" /> Resume toolkit</p>
-              <h2 id="builder-ai-shortcuts-title" className="mt-1 text-lg font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">A little help, right when you need it.</h2>
-              <p className="mt-1 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Choose a quick check, or start with a role template.</p>
+              <h2 id="builder-ai-title" className="mt-1 text-lg font-semibold tracking-tight text-premium-gold">Choose a quick review</h2>
+              <p className="mt-1 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Three focused tools to polish your resume.</p>
             </div>
           </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-3 xl:grid-cols-5">
-            {[
-              { title: 'Improve bullets', detail: 'Make experience more specific', icon: Wand2, action: () => openAiTool('bullets') },
-              { title: 'Proofread', detail: 'Find grammar and clarity issues', icon: SpellCheck, action: () => openAiTool('grammar') },
-              { title: 'Find role keywords', detail: 'Get relevant skills to include', icon: SearchCheck, action: () => openAiTool('keywords') },
-              { title: 'Check ATS readiness', detail: 'Review formatting and content', icon: FileSearch, action: () => openAiTool('bullets', 'ai-ats-check') },
-              { title: 'Match a job', detail: 'Compare your resume to a role', icon: CheckCircle2, action: () => openAiTool('bullets', 'ai-job-match') },
-            ].map(({ title, detail, icon: Icon, action }) => (
-              <button key={title} type="button" onClick={action} className="group flex min-h-[76px] items-start gap-3 rounded-2xl border border-black/[0.07] bg-white p-3 text-left transition hover:border-black/20 hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:border-white/[0.1] dark:bg-[#161617] dark:hover:border-white/25 dark:hover:bg-[#1c1c1e] dark:focus-visible:ring-white">
-                <span className="mt-0.5 rounded-xl border border-black/[0.06] bg-[#f5f5f7] p-2 text-[#1d1d1f] dark:border-white/[0.1] dark:bg-[#222224] dark:text-[#f5f5f7]"><Icon className="h-4 w-4" aria-hidden="true" /></span>
-                <span className="min-w-0"><span className="block text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">{title}</span><span className="mt-0.5 block text-xs leading-5 text-[#6e6e73] dark:text-[#a1a1a6]">{detail}</span></span>
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-medium text-[#6e6e73] dark:text-[#a1a1a6]">Role templates</span>
-            {[
-              { label: 'Software engineer', industry: 'software_engineering', role: 'software engineer' },
-              { label: 'Data analyst', industry: 'data_analytics', role: 'data analyst' },
-              { label: 'Product manager', industry: 'product_management', role: 'product manager' },
-              { label: 'Marketing', industry: 'marketing', role: 'marketing specialist' },
-            ].map((template) => (
-              <button key={template.label} type="button" onClick={() => applyRoleTemplate(template.industry, template.role)} className="min-h-9 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-[#1d1d1f] transition hover:border-black/25 hover:bg-black/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:border-white/15 dark:bg-[#161617] dark:text-[#f5f5f7] dark:hover:border-white/30 dark:hover:bg-white/[0.05] dark:focus-visible:ring-white">
-                {template.label}
-              </button>
-            ))}
+          <div role="tablist" aria-label="Resume review tools" className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <button id="ai-tool-tab-grammar" role="tab" aria-selected={activeAiTab === 'grammar' && showAdvanced} aria-controls="ai-tool-content" type="button" onClick={() => openAiTool('grammar')} className={`flex min-h-[76px] items-center gap-3 rounded-2xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white ${activeAiTab === 'grammar' && showAdvanced ? 'border-[#8a681f] bg-[#fbf8ef] dark:border-[#e0c477] dark:bg-[#211c11]' : 'border-black/[0.07] bg-white hover:border-black/20 dark:border-white/[0.1] dark:bg-[#161617] dark:hover:border-white/25'}`}>
+              <span className="rounded-xl border border-black/[0.06] bg-[#f5f5f7] p-2 text-premium-gold dark:border-white/[0.1] dark:bg-[#222224]"><SpellCheck className="h-4 w-4" aria-hidden="true" /></span><span><span className="block text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">Grammar check</span><span className="mt-0.5 block text-xs text-[#6e6e73] dark:text-[#a1a1a6]">Find writing mistakes</span></span>
+            </button>
+            <button id="ai-tool-tab-keywords" role="tab" aria-selected={activeAiTab === 'keywords' && showAdvanced} aria-controls="ai-tool-content" type="button" onClick={() => openAiTool('keywords')} className={`flex min-h-[76px] items-center gap-3 rounded-2xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white ${activeAiTab === 'keywords' && showAdvanced ? 'border-[#8a681f] bg-[#fbf8ef] dark:border-[#e0c477] dark:bg-[#211c11]' : 'border-black/[0.07] bg-white hover:border-black/20 dark:border-white/[0.1] dark:bg-[#161617] dark:hover:border-white/25'}`}>
+              <span className="rounded-xl border border-black/[0.06] bg-[#f5f5f7] p-2 text-premium-gold dark:border-white/[0.1] dark:bg-[#222224]"><SearchCheck className="h-4 w-4" aria-hidden="true" /></span><span><span className="block text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">Keyword suggestions</span><span className="mt-0.5 block text-xs text-[#6e6e73] dark:text-[#a1a1a6]">Find skills for your target role</span></span>
+            </button>
+            <button id="ai-tool-tab-ats" role="tab" aria-selected={activeAiTab === 'ats' && showAdvanced} aria-controls="ai-tool-content" type="button" onClick={() => openAiTool('ats')} className={`flex min-h-[76px] items-center gap-3 rounded-2xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white ${activeAiTab === 'ats' && showAdvanced ? 'border-[#8a681f] bg-[#fbf8ef] dark:border-[#e0c477] dark:bg-[#211c11]' : 'border-black/[0.07] bg-white hover:border-black/20 dark:border-white/[0.1] dark:bg-[#161617] dark:hover:border-white/25'}`}>
+              <span className="rounded-xl border border-black/[0.06] bg-[#f5f5f7] p-2 text-premium-gold dark:border-white/[0.1] dark:bg-[#222224]"><FileSearch className="h-4 w-4" aria-hidden="true" /></span><span><span className="block text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">ATS compatibility</span><span className="mt-0.5 block text-xs text-[#6e6e73] dark:text-[#a1a1a6]">Check structure and readability</span></span>
+            </button>
           </div>
         </div>
       </section>
 
-      {/* AI Tools Panel */}
       {showAdvanced && (
-        <div id="ai-tools-panel" className="scroll-mt-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="rounded-3xl border border-black/[0.08] bg-white p-6 dark:border-white/[0.1] dark:bg-[#121212]">
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-[#86868b] dark:text-[#a1a1a6]"><Sparkles className="h-3.5 w-3.5" /> Resume toolkit</p>
-                <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">AI tools & analysis</h2>
-              </div>
-              <button type="button" onClick={() => setShowAdvanced(false)} className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-[#6e6e73] hover:bg-black/[0.04] dark:border-white/15 dark:text-[#a1a1a6] dark:hover:bg-white/[0.05]">Close tools</button>
-            </div>
-
-            {/* AI Tools Tabs */}
-            <div className="border-b mb-6">
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => setActiveAiTab('bullets')}
-                  className={`px-4 py-2 font-medium transition ${
-                    activeAiTab === 'bullets'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  Bullet Improvement
-                </button>
-                <button
-                  onClick={() => setActiveAiTab('grammar')}
-                  className={`px-4 py-2 font-medium transition ${
-                    activeAiTab === 'grammar'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  Grammar Check
-                </button>
-                <button
-                  onClick={() => setActiveAiTab('keywords')}
-                  className={`px-4 py-2 font-medium transition ${
-                    activeAiTab === 'keywords'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  Keyword Suggestions
-                </button>
-              </div>
-            </div>
-
-            {/* AI Tools Content */}
-            {activeAiTab === 'bullets' && (
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <select
-                    className="px-4 py-2 border border-gray-300 rounded-lg"
-                    onChange={(e) => {
-                      const section = e.target.value
-                      const bullets = section === 'experience'
-                        ? resumeData.experience.flatMap((exp) => exp.bullets)
-                        : resumeData.projects.flatMap((proj) => proj.bullets)
-                      if (bullets.length > 0) {
-                        handleImproveBullets(bullets)
-                      }
-                    }}
-                  >
-                    <option value="">Select section to improve...</option>
-                    <option value="experience">Experience Bullets</option>
-                    <option value="projects">Project Bullets</option>
-                  </select>
-                  {isAiProcessing && <Loader2 className="h-5 w-5 animate-spin text-blue-600" />}
-                </div>
-                {aiResults?.bullets && (
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-3">Improved Bullets</h3>
-                      <ul className="space-y-2">
-                        {aiResults.bullets.improved_bullets?.map((bullet: string, idx: number) => (
-                          <li key={idx} className="text-sm text-gray-700">• {bullet}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    {aiResults.bullets.suggestions && aiResults.bullets.suggestions.length > 0 && (
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h3 className="font-semibold text-gray-900 mb-3">Suggestions</h3>
-                        <ul className="space-y-2">
-                          {aiResults.bullets.suggestions.map((suggestion: string, idx: number) => (
-                            <li key={idx} className="text-sm text-gray-700">• {suggestion}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2">Improvement Score</h3>
-                      <p className="text-2xl font-bold text-green-600">{aiResults.bullets.improvement_score?.toFixed(1)}%</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
+        <section id="ai-tools-panel" aria-label="Selected resume review tool" className="mx-auto max-w-7xl scroll-mt-6 px-4 pt-4 sm:px-6 lg:px-8">
+          <div id="ai-tool-content" role="tabpanel" aria-labelledby={`ai-tool-tab-${activeAiTab}`} className="rounded-3xl border border-black/[0.08] bg-white p-5 dark:border-white/[0.1] dark:bg-[#121212] sm:p-6">
             {activeAiTab === 'grammar' && (
               <div className="space-y-4">
-                <button
-                  onClick={handleCheckGrammar}
-                  disabled={isAiProcessing}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                >
-                  {isAiProcessing ? 'Checking...' : 'Check Grammar'}
-                </button>
-                {aiResults?.grammar && (
-                  <div className="space-y-4">
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2">Overall Score</h3>
-                      <p className="text-2xl font-bold text-green-600">{aiResults.grammar.overall_score?.toFixed(1)}%</p>
-                      <p className="text-sm text-gray-600 mt-2">{aiResults.grammar.summary}</p>
-                    </div>
-                    {aiResults.grammar.total_errors > 0 && (
-                      <div className="bg-red-50 rounded-lg p-4">
-                        <h3 className="font-semibold text-gray-900 mb-3">Errors ({aiResults.grammar.total_errors})</h3>
-                        <ul className="space-y-2">
-                          {Object.entries(aiResults.grammar.sections || {}).map(([section, data]: [string, any]) => (
-                            data.errors?.length > 0 && (
-                              <div key={section} className="mb-3">
-                                <p className="text-sm font-medium text-gray-800 mb-1 capitalize">{section.replace(/_/g, ' ')}</p>
-                                {data.errors.map((error: any, idx: number) => (
-                                  <li key={idx} className="text-sm text-gray-700 ml-4">
-                                    <span className={`font-medium ${error.type === 'spelling' ? 'text-orange-600' : 'text-red-600'}`}>
-                                      {error.type}:
-                                    </span> {error.message}
-                                  </li>
-                                ))}
-                              </div>
-                            )
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {aiResults.grammar.total_warnings > 0 && (
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h3 className="font-semibold text-gray-900 mb-3">Warnings ({aiResults.grammar.total_warnings})</h3>
-                        <ul className="space-y-2">
-                          {Object.entries(aiResults.grammar.sections || {}).map(([section, data]: [string, any]) => (
-                            data.warnings?.length > 0 && (
-                              <div key={section} className="mb-3">
-                                <p className="text-sm font-medium text-gray-800 mb-1 capitalize">{section.replace(/_/g, ' ')}</p>
-                                {data.warnings.map((warning: any, idx: number) => (
-                                  <li key={idx} className="text-sm text-gray-700 ml-4">
-                                    <span className="font-medium text-yellow-600">{warning.type}:</span> {warning.message}
-                                  </li>
-                                ))}
-                              </div>
-                            )
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="text-lg font-semibold text-premium-gold">Grammar check</h3><p className="mt-1 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Review spelling, grammar, and clarity across your resume.</p></div><button type="button" onClick={handleCheckGrammar} disabled={isAiProcessing} className="min-h-10 rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-wait disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-200">{isAiProcessing ? 'Checking…' : 'Check for mistakes'}</button></div>
+                {isAiProcessing && <p role="status" className="text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Reviewing your resume…</p>}
+                {aiResults?.grammar && <div className="space-y-4">
+                  <div className="rounded-2xl border border-black/[0.06] bg-[#f5f5f7] p-4 dark:border-white/[0.08] dark:bg-[#161617]"><h4 className="font-semibold text-premium-gold">Overall score: {aiResults.grammar.overall_score?.toFixed(1)}%</h4><p className="mt-1 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">{aiResults.grammar.summary}</p></div>
+                  {aiResults.grammar.total_errors > 0 && <div className="rounded-2xl border border-black/[0.06] p-4 dark:border-white/[0.08]"><h4 className="font-semibold text-premium-gold">Mistakes ({aiResults.grammar.total_errors})</h4><div className="mt-3 space-y-3">{Object.entries(aiResults.grammar.sections || {}).map(([section, data]: [string, any]) => data.errors?.length > 0 && <div key={section}><p className="text-sm font-medium capitalize text-[#1d1d1f] dark:text-[#f5f5f7]">{section.replace(/_/g, ' ')}</p><ul className="mt-1 space-y-1">{data.errors.map((error: any, idx: number) => <li key={idx} className="text-sm text-[#6e6e73] dark:text-[#a1a1a6]">{error.type}: {error.message}</li>)}</ul></div>)}</div></div>}
+                  {aiResults.grammar.total_warnings > 0 && <div className="rounded-2xl border border-black/[0.06] p-4 dark:border-white/[0.08]"><h4 className="font-semibold text-premium-gold">Suggestions ({aiResults.grammar.total_warnings})</h4><div className="mt-3 space-y-3">{Object.entries(aiResults.grammar.sections || {}).map(([section, data]: [string, any]) => data.warnings?.length > 0 && <div key={section}><p className="text-sm font-medium capitalize text-[#1d1d1f] dark:text-[#f5f5f7]">{section.replace(/_/g, ' ')}</p><ul className="mt-1 space-y-1">{data.warnings.map((warning: any, idx: number) => <li key={idx} className="text-sm text-[#6e6e73] dark:text-[#a1a1a6]">{warning.type}: {warning.message}</li>)}</ul></div>)}</div></div>}
+                </div>}
               </div>
             )}
 
             {activeAiTab === 'keywords' && (
               <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <input
-                    type="text"
-                    aria-label="Industry"
-                    placeholder="Industry (optional)"
-                    value={aiIndustry}
-                    className="min-h-11 min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-4 py-2 text-sm text-[#1d1d1f] outline-none focus:ring-2 focus:ring-black/20 dark:border-white/15 dark:bg-[#161617] dark:text-[#f5f5f7] dark:focus:ring-white/20"
-                    onChange={(e) => setAiIndustry(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    aria-label="Target role"
-                    placeholder="Target role (required)"
-                    value={aiRole}
-                    className="min-h-11 min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-4 py-2 text-sm text-[#1d1d1f] outline-none focus:ring-2 focus:ring-black/20 dark:border-white/15 dark:bg-[#161617] dark:text-[#f5f5f7] dark:focus:ring-white/20"
-                    onChange={(e) => setAiRole(e.target.value)}
-                  />
-                  <button
-                    onClick={() => handleSuggestKeywords(aiIndustry, aiRole)}
-                    disabled={isAiProcessing || !aiRole.trim()}
-                    className="min-h-11 rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
-                  >
-                    {isAiProcessing ? 'Suggesting...' : 'Suggest Keywords'}
-                  </button>
-                </div>
-                {aiResults?.keywords && (
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-3">Suggested Keywords</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {aiResults.keywords.suggested_keywords?.map((keyword: string, idx: number) => (
-                          <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                            {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2">Keyword Coverage</h3>
-                      <p className="text-2xl font-bold text-green-600">{aiResults.keywords.keyword_coverage?.toFixed(1)}%</p>
-                      <p className="text-sm text-gray-600 mt-2">
-                        Missing {aiResults.keywords.missing_count} keywords from {aiResults.keywords.industry || 'general'} industry
-                      </p>
-                    </div>
-                  </div>
-                )}
+                <div><h3 className="text-lg font-semibold text-premium-gold">Keyword suggestions</h3><p className="mt-1 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Choose the role you’re targeting to find relevant skills.</p></div>
+                <div className="flex flex-col gap-3 sm:flex-row"><input type="text" aria-label="Industry" placeholder="Industry (optional)" value={aiIndustry} onChange={(e) => setAiIndustry(e.target.value)} className="min-h-11 min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-4 py-2 text-sm text-[#1d1d1f] dark:border-white/15 dark:bg-[#161617] dark:text-[#f5f5f7]" /><input type="text" aria-label="Target role" placeholder="Target role (required)" value={aiRole} onChange={(e) => setAiRole(e.target.value)} className="min-h-11 min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-4 py-2 text-sm text-[#1d1d1f] dark:border-white/15 dark:bg-[#161617] dark:text-[#f5f5f7]" /><button type="button" onClick={() => handleSuggestKeywords(aiIndustry, aiRole)} disabled={isAiProcessing || !aiRole.trim()} className="min-h-11 rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-200">{isAiProcessing ? 'Suggesting…' : 'Suggest keywords'}</button></div>
+                {aiResults?.keywords && <div className="grid gap-4 sm:grid-cols-2"><div className="rounded-2xl border border-black/[0.06] bg-[#f5f5f7] p-4 dark:border-white/[0.08] dark:bg-[#161617]"><h4 className="font-semibold text-premium-gold">Suggested keywords</h4><div className="mt-3 flex flex-wrap gap-2">{aiResults.keywords.suggested_keywords?.map((keyword: string, idx: number) => <span key={idx} className="rounded-full border border-black/[0.08] px-3 py-1 text-sm text-[#1d1d1f] dark:border-white/[0.12] dark:text-[#f5f5f7]">{keyword}</span>)}</div></div><div className="rounded-2xl border border-black/[0.06] p-4 dark:border-white/[0.08]"><h4 className="font-semibold text-premium-gold">Keyword coverage: {aiResults.keywords.keyword_coverage?.toFixed(1)}%</h4><p className="mt-2 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">{aiResults.keywords.missing_count} keywords missing for {aiResults.keywords.industry || aiRole}.</p></div></div>}
               </div>
             )}
 
-            {/* ATS Checker */}
-            <div id="ai-ats-check" className="mt-8 scroll-mt-6 border-t border-black/[0.08] pt-6 dark:border-white/[0.1]">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">ATS Compatibility Checker</h3>
-              <button
-                onClick={handleCheckATS}
-                disabled={isAiProcessing}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
-              >
-                {isAiProcessing ? 'Checking...' : 'Check ATS Compatibility'}
-              </button>
-              {atsResults && (
-                <div className="mt-4 bg-gray-50 rounded-lg p-4">
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-gray-900">Overall Score</span>
-                      <span className={`text-2xl font-bold ${atsResults.overall_score >= 80 ? 'text-green-600' : atsResults.overall_score >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
-                        {atsResults.overall_score.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${atsResults.overall_score >= 80 ? 'bg-green-600' : atsResults.overall_score >= 60 ? 'bg-yellow-600' : 'bg-red-600'}`}
-                        style={{ width: `${atsResults.overall_score}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-gray-900">Detailed Checks</h4>
-                    {Object.entries(atsResults.checks || {}).map(([key, value]: [string, any]) => (
-                      <div key={key} className="bg-white rounded p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-700 capitalize">{key.replace(/_/g, ' ')}</span>
-                          <span className={`text-sm font-bold ${value.passed ? 'text-green-600' : 'text-red-600'}`}>
-                            {value.passed ? '✓ Pass' : '✗ Fail'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 mb-2">{value.message}</p>
-                        {value.issues && value.issues.length > 0 && (
-                          <ul className="text-xs text-red-600 space-y-1">
-                            {value.issues.map((issue: string, idx: number) => (
-                              <li key={idx}>• {issue}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  {atsResults.recommendations && atsResults.recommendations.length > 0 && (
-                    <div className="mt-4 bg-blue-50 rounded-lg p-3">
-                      <h4 className="font-semibold text-gray-900 mb-2">Recommendations</h4>
-                      <ul className="space-y-1 text-sm text-gray-700">
-                        {atsResults.recommendations.map((recommendation: string, idx: number) => (
-                          <li key={idx}>• {recommendation}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Job Description Analyzer */}
-            <div id="ai-job-match" className="mt-8 scroll-mt-6 border-t border-black/[0.08] pt-6 dark:border-white/[0.1]">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Job Description Analyzer</h3>
-              <textarea
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Paste job description here..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-32 resize-none"
-              />
-              <div className="flex space-x-4 mt-4">
-                <button
-                  onClick={() => handleAnalyzeJob(jobDescription)}
-                  disabled={isAiProcessing}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-                >
-                  {isAiProcessing ? 'Analyzing...' : 'Analyze Job'}
-                </button>
-                <button
-                  onClick={() => handleCompareWithJob(jobDescription)}
-                  disabled={isAiProcessing}
-                  className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition disabled:opacity-50"
-                >
-                  {isAiProcessing ? 'Comparing...' : 'Compare with Resume'}
-                </button>
+            {activeAiTab === 'ats' && (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="text-lg font-semibold text-premium-gold">ATS compatibility</h3><p className="mt-1 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Check structure, contact details, and resume readability.</p></div><button type="button" onClick={handleCheckATS} disabled={isAiProcessing} className="min-h-10 rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-wait disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-200">{isAiProcessing ? 'Checking…' : 'Check ATS compatibility'}</button></div>
+                {isAiProcessing && <p role="status" className="text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Checking your resume…</p>}
+                {atsResults && <div className="space-y-4"><div className="rounded-2xl border border-black/[0.06] bg-[#f5f5f7] p-4 dark:border-white/[0.08] dark:bg-[#161617]"><div className="flex items-center justify-between gap-3"><h4 className="font-semibold text-premium-gold">Overall score</h4><span className="text-xl font-semibold text-premium-gold">{atsResults.overall_score.toFixed(1)}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10"><div className="h-full rounded-full bg-[#8a681f] dark:bg-[#e0c477]" style={{ width: `${Math.max(0, Math.min(100, atsResults.overall_score))}%` }} /></div></div><div className="grid gap-3 sm:grid-cols-2">{Object.entries(atsResults.checks || {}).map(([key, value]: [string, any]) => <div key={key} className="rounded-2xl border border-black/[0.06] p-4 dark:border-white/[0.08]"><div className="flex items-center justify-between gap-2"><h4 className="text-sm font-medium capitalize text-[#1d1d1f] dark:text-[#f5f5f7]">{key.replace(/_/g, ' ')}</h4><span className="text-xs font-medium text-premium-gold">{value.passed ? 'Pass' : 'Needs work'}</span></div><p className="mt-2 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">{value.message}</p>{value.issues?.length > 0 && <ul className="mt-2 space-y-1 text-xs text-[#6e6e73] dark:text-[#a1a1a6]">{value.issues.map((issue: string, idx: number) => <li key={idx}>• {issue}</li>)}</ul>}</div>)}</div>{atsResults.recommendations?.length > 0 && <div className="rounded-2xl border border-black/[0.06] p-4 dark:border-white/[0.08]"><h4 className="font-semibold text-premium-gold">Recommended next steps</h4><ul className="mt-2 space-y-1 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">{atsResults.recommendations.map((recommendation: string, idx: number) => <li key={idx}>• {recommendation}</li>)}</ul></div>}</div>}
               </div>
-              {jobAnalysis && (
-                <div className="mt-4 space-y-4">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Job Analysis</h4>
-                    {jobAnalysis.required_skills && jobAnalysis.required_skills.length > 0 && (
-                      <div className="mb-3">
-                        <span className="text-sm font-medium text-gray-700">Required Skills:</span>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {jobAnalysis.required_skills.map((skill: string, idx: number) => (
-                            <span key={idx} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {jobAnalysis.soft_skills && jobAnalysis.soft_skills.length > 0 && (
-                      <div className="mb-3">
-                        <span className="text-sm font-medium text-gray-700">Soft Skills:</span>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {jobAnalysis.soft_skills.map((skill: string, idx: number) => (
-                            <span key={idx} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {jobAnalysis.experience_level && (
-                      <div className="mb-3">
-                        <span className="text-sm font-medium text-gray-700">Experience Level:</span>
-                        <span className="ml-2 text-sm text-gray-600">{jobAnalysis.experience_level}</span>
-                      </div>
-                    )}
-                    {jobAnalysis.key_responsibilities && jobAnalysis.key_responsibilities.length > 0 && (
-                      <div>
-                        <span className="text-sm font-medium text-gray-700">Key Responsibilities:</span>
-                        <ul className="mt-1 space-y-1 text-sm text-gray-600">
-                          {jobAnalysis.key_responsibilities.map((resp: string, idx: number) => (
-                            <li key={idx}>• {resp}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  {jobAnalysis.comparison && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-900 mb-3">Gap Analysis</h4>
-                      <div className="mb-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-700">Match Percentage</span>
-                          <span className={`text-xl font-bold ${jobAnalysis.comparison.match_percentage >= 70 ? 'text-green-600' : jobAnalysis.comparison.match_percentage >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
-                            {jobAnalysis.comparison.match_percentage}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${jobAnalysis.comparison.match_percentage >= 70 ? 'bg-green-600' : jobAnalysis.comparison.match_percentage >= 50 ? 'bg-yellow-600' : 'bg-red-600'}`}
-                            style={{ width: `${jobAnalysis.comparison.match_percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div>
-                          <span className="text-sm font-medium text-green-600">Matched Skills ({jobAnalysis.comparison.matched_skills?.length || 0}):</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {jobAnalysis.comparison.matched_skills?.map((skill: string, idx: number) => (
-                              <span key={idx} className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-sm font-medium text-red-600">Missing Skills ({jobAnalysis.comparison.missing_skills?.length || 0}):</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {jobAnalysis.comparison.missing_skills?.map((skill: string, idx: number) => (
-                              <span key={idx} className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      {jobAnalysis.comparison.recommendations && jobAnalysis.comparison.recommendations.length > 0 && (
-                        <div className="mt-3 bg-blue-50 rounded p-3">
-                          <span className="text-sm font-medium text-gray-900">Recommendations:</span>
-                          <ul className="mt-1 space-y-1 text-sm text-gray-700">
-                            {jobAnalysis.comparison.recommendations.map((rec: string, idx: number) => (
-                              <li key={idx}>• {rec}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            )}
           </div>
-        </div>
+        </section>
       )}
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

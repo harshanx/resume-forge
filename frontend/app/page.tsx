@@ -52,7 +52,7 @@ export default function Home() {
             <span className="h-1.5 w-1.5 rounded-full bg-black dark:bg-white" />
             LaTeX Engine 2.0 <span className="text-[#86868b]">•</span> ATS Compliant <span className="text-[#86868b]">•</span> Single Page Guaranteed
           </p>
-          <h1 className="mx-auto mt-7 max-w-4xl text-5xl font-semibold leading-[1.08] tracking-tight text-[#1d1d1f] sm:text-6xl md:text-7xl dark:text-[#f5f5f7]">A resume that gets out of your way.</h1>
+          <h1 className="mx-auto mt-7 max-w-4xl text-5xl font-semibold leading-[1.08] tracking-tight text-premium-gold sm:text-6xl md:text-7xl">A resume that gets out of your way.</h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[#6e6e73] md:text-xl dark:text-[#a1a1a6]">Turn your experience into a focused, ATS-ready resume. Built for clear thinking, quick tailoring, and a polished final PDF.</p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/builder" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-black px-7 py-3 text-sm font-medium text-white transition-all hover:scale-[1.02] focus-visible:ring-black/30 active:scale-[0.98] dark:bg-white dark:text-black dark:focus-visible:ring-white/30">Create your resume <ArrowRight className="h-4 w-4" /></Link>

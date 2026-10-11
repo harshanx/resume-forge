@@ -211,7 +211,7 @@ We offer competitive salary, remote work options, and opportunities for growth.`
       <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
         <section className="mb-8 max-w-2xl">
           <p className="text-sm font-medium text-[#6e6e73] dark:text-[#a1a1a6]">Make each application more relevant</p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">Job analyzer</h1>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-premium-gold">Job analyzer</h1>
           <p className="mt-3 text-sm leading-6 text-[#6e6e73] dark:text-[#a1a1a6]">Review the role requirements or compare them with one of your saved resumes.</p>
         </section>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

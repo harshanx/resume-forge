@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, FileText, Trash2, Edit, LogOut, Copy, Check, X, Search } from 'lucide-react'
+import { Plus, FileText, Trash2, Edit, Copy, Check, X, Search } from 'lucide-react'
 import { supabase } from '@/lib/firebase'
 import { getCurrentSessionUser } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
@@ -70,15 +70,6 @@ export default function DashboardPage() {
       console.error('Error loading resumes:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut()
-      router.push('/')
-    } catch (error) {
-      console.error('Logout error:', error)
     }
   }
 
@@ -160,15 +151,11 @@ export default function DashboardPage() {
         <div className="mb-9 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-medium text-[#6e6e73] dark:text-[#a1a1a6]">Your workspace</p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">My resumes</h1>
+            <h1 className="mt-2 text-4xl font-semibold tracking-tight text-premium-gold">My resumes</h1>
             <p className="mt-2 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Keep each version ready for the role you want.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="max-w-56 truncate text-sm text-[#6e6e73] dark:text-[#a1a1a6]">{user?.user_metadata?.name || user?.email}</span>
-            <button onClick={handleLogout} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-black/15 px-4 py-2 text-sm font-medium text-[#1d1d1f] transition hover:bg-black/[0.04] dark:border-white/20 dark:text-[#f5f5f7] dark:hover:bg-white/[0.05]">
-              <LogOut className="h-4 w-4" />
-              <span>Sign out</span>
-            </button>
           <Link
             href="/builder"
             className="inline-flex min-h-10 items-center gap-2 rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"

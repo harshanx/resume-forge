@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
       <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center px-5 py-12 sm:px-8">
         <section className="w-full max-w-md rounded-3xl border border-black/[0.07] bg-[#f5f5f7] p-7 dark:border-white/[0.1] dark:bg-[#121212] sm:p-9">
           <p className="text-center text-xs font-medium uppercase tracking-[0.16em] text-[#86868b]">Account recovery</p>
-          <h1 className="mt-3 text-center text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">Choose a new password</h1>
+          <h1 className="mt-3 text-center text-3xl font-semibold tracking-tight text-premium-gold">Choose a new password</h1>
           {!ready && !error && !message && <p role="status" className="mt-4 text-center text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Checking your secure reset link…</p>}
           {error && <p role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">{error} <Link href="/forgot-password" className="font-medium underline underline-offset-4">Request another link</Link></p>}
           {message && <p role="status" className="mt-6 rounded-2xl border border-black/10 bg-white p-4 text-sm leading-6 text-[#1d1d1f] dark:border-white/15 dark:bg-black dark:text-[#f5f5f7]">{message}</p>}
