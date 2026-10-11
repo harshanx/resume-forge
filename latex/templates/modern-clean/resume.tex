@@ -33,23 +33,23 @@
 
 % Header Section - Modern Style
 \begin{center}
-    {\Huge\bfseries\color{primary} [[ name ]]}
+    {\Huge\bfseries\color{primary} [[ personal.name ]]}
     
     \vspace{6pt}
     
     {\large
-    [% if phone %][[ phone ]][% endif %]
-    [% if phone and (email or linkedin or github) %] | [% endif %]
-    [% if email %][[ email ]][% endif %]
-    [% if email and (linkedin or github) %] | [% endif %]
-    [% if linkedin %][[ linkedin ]][% endif %]
-    [% if linkedin and github %] | [% endif %]
-    [% if github %][[ github ]][% endif %]
+    [% if personal.phone %][[ personal.phone ]][% endif %]
+    [% if personal.phone and (personal.email or personal.linkedin or personal.github) %] | [% endif %]
+    [% if personal.email %][[ personal.email ]][% endif %]
+    [% if personal.email and (personal.linkedin or personal.github) %] | [% endif %]
+    [% if personal.linkedin %][[ personal.linkedin ]][% endif %]
+    [% if personal.linkedin and personal.github %] | [% endif %]
+    [% if personal.github %][[ personal.github ]][% endif %]
     }
     
-    [% if location %]
+    [% if personal.location %]
     \vspace{3pt}
-    {\normalsize\color{gray} [[ location ]]}
+    {\normalsize\color{gray} [[ personal.location ]]}
     [% endif %]
 \end{center}
 
