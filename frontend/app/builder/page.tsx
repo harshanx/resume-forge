@@ -383,9 +383,13 @@ export default function BuilderPage() {
   }
 
   const handleDownload = async () => {
+    const isMobile = window.matchMedia('(max-width: 767px)').matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    // Mobile browsers commonly block downloads started after an awaited fetch.
+    // Open a window during the tap, then load the returned PDF into its viewer.
+    const pdfWindow = isMobile ? window.open('about:blank', '_blank') : null
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      console.log('Downloading from:', `${apiUrl}/api/resume/download`)
       const headers = await getAuthHeaders()
       const response = await fetch(`${apiUrl}/api/resume/download?template=${selectedTemplate}`, {
         method: 'POST',
@@ -400,8 +404,33 @@ export default function BuilderPage() {
       }
 
       const blob = await response.blob()
-      console.log('Blob size:', blob.size, 'bytes')
       const url = window.URL.createObjectURL(blob)
+      if (pdfWindow) {
+        pdfWindow.opener = null
+        pdfWindow.location.href = url
+        const cleanupWhenClosed = window.setInterval(() => {
+          if (pdfWindow.closed) {
+            window.clearInterval(cleanupWhenClosed)
+            window.URL.revokeObjectURL(url)
+          }
+        }, 1000)
+        // Avoid an indefinite leak in browsers that don't expose the PDF tab's
+        // closed state reliably.
+        window.setTimeout(() => {
+          window.clearInterval(cleanupWhenClosed)
+          window.URL.revokeObjectURL(url)
+        }, 10 * 60_000)
+        return
+      }
+
+      if (isMobile) {
+        // If a browser blocks the synchronously opened tab, navigate the current
+        // tab to the PDF so the download still reaches the native viewer.
+        window.location.href = url
+        window.setTimeout(() => window.URL.revokeObjectURL(url), 10 * 60_000)
+        return
+      }
+
       const a = document.createElement('a')
       a.href = url
       a.download = `${resumeData.personal.name.replace(/\s+/g, '_')}_Resume.pdf`
@@ -411,6 +440,7 @@ export default function BuilderPage() {
       // Give mobile browsers time to start reading the blob before releasing it.
       window.setTimeout(() => window.URL.revokeObjectURL(url), 1000)
     } catch (error) {
+      pdfWindow?.close()
       console.error('Error downloading resume:', error)
       alert(`Failed to download resume: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -418,7 +448,14 @@ export default function BuilderPage() {
 
   const handleDownloadFromPreview = () => {
     if (generatedPdf) {
-      // Download from the base64 preview
+      const isMobile = window.matchMedia('(max-width: 767px)').matches || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      if (isMobile) {
+        // Open the PDF directly from the tap so mobile browsers can show their
+        // native PDF viewer and its Save/Share controls.
+        window.open(generatedPdf, '_blank', 'noopener,noreferrer')
+        return
+      }
+
       const link = document.createElement('a')
       link.href = generatedPdf
       link.download = `${resumeData.personal.name.replace(/\s+/g, '_')}_Resume.pdf`
