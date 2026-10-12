@@ -1,18 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { isValidHttpUrl } from '@/lib/validation'
+import type { StepFormHandle } from './StepFormHandle'
 
 type Project = { name: string; technologies: string; github_url?: string; bullets: string[] }
 interface ProjectsFormProps { data: Project[]; onChange: (data: Project[]) => void; onValidityChange?: (isValid: boolean) => void }
 const emptyProject = (): Project => ({ name: '', technologies: '', github_url: '', bullets: [''] })
 const fieldClass = 'w-full min-h-10 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-primary-500'
 
-export default function ProjectsForm({ data, onChange, onValidityChange }: ProjectsFormProps) {
+const ProjectsForm = forwardRef<StepFormHandle, ProjectsFormProps>(function ProjectsForm({ data, onChange, onValidityChange }, ref) {
   const [draft, setDraft] = useState(emptyProject)
-  const urlsValid = data.every((project) => isValidHttpUrl(project.github_url || '')) && isValidHttpUrl(draft.github_url || '')
-  useEffect(() => { onValidityChange?.(urlsValid) }, [onValidityChange, urlsValid])
+  const draftTouched = Boolean(draft.name.trim() || draft.technologies.trim() || draft.github_url?.trim() || draft.bullets.some((bullet) => bullet.trim()))
+  const draftValid = !draftTouched || Boolean(draft.name.trim() && draft.technologies.trim()) && isValidHttpUrl(draft.github_url || '')
+  const isValid = data.every((project) => Boolean(project.name.trim() && project.technologies.trim()) && isValidHttpUrl(project.github_url || '')) && draftValid
+  useEffect(() => { onValidityChange?.(isValid) }, [onValidityChange, isValid])
   const updateProject = (index: number, field: keyof Project, value: string) => {
     onChange(data.map((project, rowIndex) => rowIndex === index ? { ...project, [field]: value } : project))
   }
@@ -20,10 +23,17 @@ export default function ProjectsForm({ data, onChange, onValidityChange }: Proje
     onChange(data.map((project, rowIndex) => rowIndex === index ? { ...project, bullets: project.bullets.map((bullet, itemIndex) => itemIndex === bulletIndex ? value : bullet) } : project))
   }
   const handleAdd = () => {
-    if (!draft.name.trim() || !draft.technologies.trim() || !isValidHttpUrl(draft.github_url || '')) return
+    if (!draft.name.trim() || !draft.technologies.trim() || !isValidHttpUrl(draft.github_url || '')) return false
     onChange([...data, { ...draft, bullets: draft.bullets.filter((bullet) => bullet.trim()) }])
     setDraft(emptyProject())
+    return true
   }
+  useImperativeHandle(ref, () => ({
+    commitDraft: () => {
+      if (!draftTouched) return true
+      return handleAdd()
+    },
+  }))
   const projectFields = (project: Project, index: number) => (
     <>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -61,4 +71,6 @@ export default function ProjectsForm({ data, onChange, onValidityChange }: Proje
       <button type="button" disabled={!draft.name.trim() || !draft.technologies.trim() || !isValidHttpUrl(draft.github_url || '')} onClick={handleAdd} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-black px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-black"><Plus className="h-4 w-4" />Add project</button>
     </section>
   </div>
-}
+})
+
+export default ProjectsForm

@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { isValidHttpUrl } from '@/lib/validation'
+import type { StepFormHandle } from './StepFormHandle'
 
 interface CertificationsFormProps {
   data: Array<{
@@ -16,7 +17,7 @@ interface CertificationsFormProps {
   onValidityChange?: (isValid: boolean) => void
 }
 
-export default function CertificationsForm({ data, onChange, onValidityChange }: CertificationsFormProps) {
+const CertificationsForm = forwardRef<StepFormHandle, CertificationsFormProps>(function CertificationsForm({ data, onChange, onValidityChange }, ref) {
   const [newCert, setNewCert] = useState({
     name: '',
     organization: '',
@@ -24,8 +25,10 @@ export default function CertificationsForm({ data, onChange, onValidityChange }:
     certificate_id: '',
     url: '',
   })
-  const urlsValid = data.every((cert) => isValidHttpUrl(cert.url || '')) && isValidHttpUrl(newCert.url)
-  useEffect(() => { onValidityChange?.(urlsValid) }, [onValidityChange, urlsValid])
+  const draftTouched = Object.values(newCert).some((value) => value.trim() !== '')
+  const draftValid = !draftTouched || Boolean(newCert.name.trim()) && isValidHttpUrl(newCert.url)
+  const isValid = data.every((cert) => Boolean(cert.name.trim()) && isValidHttpUrl(cert.url || '')) && draftValid
+  useEffect(() => { onValidityChange?.(isValid) }, [onValidityChange, isValid])
 
   const handleAdd = () => {
     if (newCert.name.trim() && isValidHttpUrl(newCert.url)) {
@@ -37,8 +40,17 @@ export default function CertificationsForm({ data, onChange, onValidityChange }:
         certificate_id: '',
         url: '',
       })
+      return true
     }
+    return false
   }
+
+  useImperativeHandle(ref, () => ({
+    commitDraft: () => {
+      if (!draftTouched) return true
+      return handleAdd()
+    },
+  }))
 
   const handleRemove = (index: number) => {
     onChange(data.filter((_, i) => i !== index))
@@ -192,4 +204,6 @@ export default function CertificationsForm({ data, onChange, onValidityChange }:
       </div>
     </div>
   )
-}
+})
+
+export default CertificationsForm

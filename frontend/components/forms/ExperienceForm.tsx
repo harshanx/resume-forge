@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { Plus, X } from 'lucide-react'
+import type { StepFormHandle } from './StepFormHandle'
 
 type Experience = {
   job_title: string
@@ -52,7 +53,7 @@ function validEntry(experience: Experience) {
   return Boolean(experience.job_title.trim() && experience.company.trim()) && datesValid
 }
 
-export default function ExperienceForm({ data, onChange, onValidityChange }: ExperienceFormProps) {
+const ExperienceForm = forwardRef<StepFormHandle, ExperienceFormProps>(function ExperienceForm({ data, onChange, onValidityChange }, ref) {
   const [draft, setDraft] = useState(emptyExperience)
   const draftTouched = Boolean(draft.job_title || draft.company || draft.start_date || draft.end_date || draft.bullets.some(Boolean))
   const draftValid = !draftTouched || Boolean(draft.job_title.trim() && draft.company.trim() && draft.start_date &&
@@ -88,10 +89,18 @@ export default function ExperienceForm({ data, onChange, onValidityChange }: Exp
   }
 
   const handleAdd = () => {
-    if (!draftValid || !draft.job_title.trim() || !draft.company.trim() || !draft.start_date || (!draft.current_role && !draft.end_date)) return
+    if (!draftValid || !draft.job_title.trim() || !draft.company.trim() || !draft.start_date || (!draft.current_role && !draft.end_date)) return false
     onChange([...data, { ...draft, bullets: draft.bullets.filter((bullet) => bullet.trim()) }])
     setDraft(emptyExperience())
+    return true
   }
+
+  useImperativeHandle(ref, () => ({
+    commitDraft: () => {
+      if (!draftTouched) return true
+      return handleAdd()
+    },
+  }))
 
   const updateBullet = (index: number, bulletIndex: number, value: string) => {
     onChange(data.map((experience, rowIndex) => rowIndex === index ? {
@@ -154,4 +163,6 @@ export default function ExperienceForm({ data, onChange, onValidityChange }: Exp
       </section>
     </div>
   )
-}
+})
+
+export default ExperienceForm

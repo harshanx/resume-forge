@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, ArrowRight, Download, Eye, FileSearch, Loader2, SearchCheck, Sparkles, SpellCheck, Save } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import PersonalInfoForm from '@/components/forms/PersonalInfoForm'
@@ -10,6 +10,7 @@ import ExperienceForm from '@/components/forms/ExperienceForm'
 import ProjectsForm from '@/components/forms/ProjectsForm'
 import CertificationsForm from '@/components/forms/CertificationsForm'
 import AchievementsForm from '@/components/forms/AchievementsForm'
+import type { StepFormHandle } from '@/components/forms/StepFormHandle'
 import ResumePreview from '@/components/ResumePreview'
 import { supabase } from '@/lib/firebase'
 import { getCurrentSessionUser } from '@/lib/auth'
@@ -92,6 +93,12 @@ export default function BuilderPage() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const resumeId = searchParams.get('resumeId')
+
+  const educationFormRef = useRef<StepFormHandle>(null)
+  const experienceFormRef = useRef<StepFormHandle>(null)
+  const projectsFormRef = useRef<StepFormHandle>(null)
+  const certificationsFormRef = useRef<StepFormHandle>(null)
+  const achievementsFormRef = useRef<StepFormHandle<string[]>>(null)
 
   const [currentStep, setCurrentStep] = useState(1)
   const [resumeName, setResumeName] = useState('')
@@ -315,7 +322,20 @@ export default function BuilderPage() {
         return
       }
       if (currentStep === 6 && !certificationsStepValid) {
-        setStepValidationError('Enter a valid certificate URL or clear the optional field before continuing.')
+        setStepValidationError('Complete the certification name and enter a valid URL, or clear the unfinished entry before continuing.')
+        return
+      }
+      const draftCommitted = currentStep === 2
+        ? educationFormRef.current?.commitDraft()
+        : currentStep === 4
+          ? experienceFormRef.current?.commitDraft()
+          : currentStep === 5
+            ? projectsFormRef.current?.commitDraft()
+            : currentStep === 6
+              ? certificationsFormRef.current?.commitDraft()
+              : true
+      if (draftCommitted === false) {
+        setStepValidationError('Complete the current entry or clear it before continuing.')
         return
       }
       setCurrentStep(currentStep + 1)
@@ -329,6 +349,8 @@ export default function BuilderPage() {
   }
 
   const handleGenerate = async () => {
+    const savedAchievements = achievementsFormRef.current?.commitDraft() || resumeData.achievements
+    const dataToGenerate = { ...resumeData, achievements: savedAchievements }
     setIsGenerating(true)
     setWarnings([])
     setGenerationError(null)
@@ -340,7 +362,7 @@ export default function BuilderPage() {
       const response = await fetch(`${apiUrl}/api/resume/generate?template=${selectedTemplate}`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(resumeData),
+        body: JSON.stringify(dataToGenerate),
       })
 
       if (!response.ok) {
@@ -483,6 +505,7 @@ export default function BuilderPage() {
       case 2:
         return (
           <EducationForm
+            ref={educationFormRef}
             data={resumeData.education}
             onChange={(data) => updateResumeData('education', data)}
             onValidityChange={setEducationStepValid}
@@ -498,6 +521,7 @@ export default function BuilderPage() {
       case 4:
         return (
           <ExperienceForm
+            ref={experienceFormRef}
             data={resumeData.experience}
             onChange={(data) => updateResumeData('experience', data)}
             onValidityChange={setExperienceStepValid}
@@ -506,6 +530,7 @@ export default function BuilderPage() {
       case 5:
         return (
           <ProjectsForm
+            ref={projectsFormRef}
             data={resumeData.projects}
             onChange={(data) => updateResumeData('projects', data)}
             onValidityChange={setProjectsStepValid}
@@ -514,6 +539,7 @@ export default function BuilderPage() {
       case 6:
         return (
           <CertificationsForm
+            ref={certificationsFormRef}
             data={resumeData.certifications}
             onChange={(data) => updateResumeData('certifications', data)}
             onValidityChange={setCertificationsStepValid}
@@ -522,6 +548,7 @@ export default function BuilderPage() {
       case 7:
         return (
           <AchievementsForm
+            ref={achievementsFormRef}
             data={resumeData.achievements}
             onChange={(data) => updateResumeData('achievements', data)}
           />
@@ -722,6 +749,9 @@ export default function BuilderPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               {steps[currentStep - 1].title}
             </h2>
+            <p className="-mt-3 mb-5 text-sm leading-6 text-gray-600 dark:text-gray-300">
+              Your entries are kept in the resume draft as you move through the steps. Use Add only when you have another entry.
+            </p>
             {renderStep()}
 
             {stepValidationError && <p role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">{stepValidationError}</p>}
@@ -741,7 +771,7 @@ export default function BuilderPage() {
                   onClick={handleNext}
                   className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
                 >
-                  <span>Next</span>
+                  <span>Save &amp; Next</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
               ) : (
@@ -758,7 +788,7 @@ export default function BuilderPage() {
                   ) : (
                     <>
                       <Eye className="h-4 w-4" />
-                      <span>Generate Resume</span>
+                      <span>Finish &amp; Generate PDF</span>
                     </>
                   )}
                 </button>

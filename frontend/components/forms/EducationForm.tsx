@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { Plus, X } from 'lucide-react'
+import type { StepFormHandle } from './StepFormHandle'
 
 type GradeScale = '10' | '5' | 'percentile'
 type Education = {
@@ -44,7 +45,7 @@ function validEducationRows(rows: Education[]) {
   })
 }
 
-export default function EducationForm({ data, onChange, onValidityChange }: EducationFormProps) {
+const EducationForm = forwardRef<StepFormHandle, EducationFormProps>(function EducationForm({ data, onChange, onValidityChange }, ref) {
   const [newEducation, setNewEducation] = useState(emptyEducation)
   const [showValidation, setShowValidation] = useState(false)
 
@@ -71,7 +72,7 @@ export default function EducationForm({ data, onChange, onValidityChange }: Educ
 
   const handleAdd = () => {
     setShowValidation(true)
-    if (!newEducation.degree.trim() || !newEducation.specialization.trim() || currentGradeError) return
+    if (!newEducation.degree.trim() || !newEducation.specialization.trim() || currentGradeError) return false
 
     const gradeValue = newEducation.grade_value.trim()
     const scale = newEducation.grade_scale
@@ -85,7 +86,15 @@ export default function EducationForm({ data, onChange, onValidityChange }: Educ
     }])
     setNewEducation(emptyEducation())
     setShowValidation(false)
+    return true
   }
+
+  useImperativeHandle(ref, () => ({
+    commitDraft: () => {
+      if (!draftTouched) return true
+      return handleAdd()
+    },
+  }))
 
   const fieldClass = 'w-full min-h-10 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-transparent focus:ring-2 focus:ring-primary-500'
   const graduationDate = (year: number) => year ? `${year}-01-01` : ''
@@ -157,7 +166,9 @@ export default function EducationForm({ data, onChange, onValidityChange }: Educ
       </section>
     </div>
   )
-}
+})
+
+export default EducationForm
 
 function GradeFields({ value, scale, error, fieldClass, onValueChange, onScaleChange }: {
   value: string

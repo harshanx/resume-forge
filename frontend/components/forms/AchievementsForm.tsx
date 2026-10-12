@@ -1,22 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { forwardRef, useImperativeHandle, useState } from 'react'
 import { Plus, X } from 'lucide-react'
+import type { StepFormHandle } from './StepFormHandle'
 
 interface AchievementsFormProps {
   data: string[]
   onChange: (data: string[]) => void
 }
 
-export default function AchievementsForm({ data, onChange }: AchievementsFormProps) {
+const AchievementsForm = forwardRef<StepFormHandle<string[]>, AchievementsFormProps>(function AchievementsForm({ data, onChange }, ref) {
   const [newAchievement, setNewAchievement] = useState('')
 
   const handleAdd = () => {
-    if (newAchievement.trim()) {
-      onChange([...data, newAchievement])
-      setNewAchievement('')
-    }
+    return commitDraft()
   }
+
+  const commitDraft = () => {
+    const achievement = newAchievement.trim()
+    if (!achievement) return data
+    const updated = [...data, achievement]
+    onChange(updated)
+    setNewAchievement('')
+    return updated
+  }
+
+  useImperativeHandle(ref, () => ({ commitDraft }))
 
   const handleRemove = (index: number) => {
     onChange(data.filter((_, i) => i !== index))
@@ -67,4 +76,6 @@ export default function AchievementsForm({ data, onChange }: AchievementsFormPro
       )}
     </div>
   )
-}
+})
+
+export default AchievementsForm
