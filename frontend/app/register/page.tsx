@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/firebase'
 import Navbar from '@/components/Navbar'
-import { getSafeReturnPath } from '@/lib/auth'
+import { getSafeReturnPath, signInWithGoogle } from '@/lib/auth'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [resending, setResending] = useState(false)
@@ -44,7 +45,7 @@ export default function RegisterPage() {
 
       if (error) throw error
 
-      if (data.user?.email_confirmed_at) {
+      if (data.session || data.user?.email_confirmed_at) {
         router.replace(getSafeReturnPath(searchParams.get('next')))
       } else {
         if (data.session) await supabase.auth.signOut()
@@ -55,6 +56,18 @@ export default function RegisterPage() {
       setError(err.message || 'Registration failed. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleGoogleRegister = async () => {
+    setGoogleLoading(true)
+    setError('')
+    try {
+      const { error: oauthError } = await signInWithGoogle(searchParams.get('next'))
+      if (oauthError) throw oauthError
+    } catch (err: any) {
+      setError(err.message || 'Could not start Google sign-in. Please try again.')
+      setGoogleLoading(false)
     }
   }
 
@@ -88,7 +101,23 @@ export default function RegisterPage() {
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="mt-7 space-y-5">
+        <button
+          type="button"
+          onClick={handleGoogleRegister}
+          disabled={googleLoading || loading}
+          className="mt-7 flex min-h-12 w-full items-center justify-center gap-3 rounded-full border border-black/15 bg-white px-5 py-3 text-sm font-medium text-[#1d1d1f] transition hover:bg-black/[0.03] disabled:cursor-wait disabled:opacity-50 dark:border-white/20 dark:bg-black dark:text-[#f5f5f7] dark:hover:bg-white/[0.05]"
+        >
+          <span aria-hidden="true" className="font-semibold text-[#4285f4]">G</span>
+          {googleLoading ? 'Connecting to Google…' : 'Continue with Google'}
+        </button>
+
+        <div className="my-5 flex items-center gap-4 text-xs text-[#86868b]" aria-hidden="true">
+          <span className="h-px flex-1 bg-black/10 dark:bg-white/15" />
+          <span>or register with email</span>
+          <span className="h-px flex-1 bg-black/10 dark:bg-white/15" />
+        </div>
+
+        <form onSubmit={handleRegister} className="space-y-5">
           <div>
             <label htmlFor="register-name" className="mb-2 block text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">Name</label>
             <input

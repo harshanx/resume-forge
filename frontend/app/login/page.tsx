@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/firebase'
 import Navbar from '@/components/Navbar'
-import { getSafeReturnPath } from '@/lib/auth'
+import { getSafeReturnPath, signInWithGoogle } from '@/lib/auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [resending, setResending] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState(searchParams.get('confirmed') === '1' ? 'Email confirmed. Sign in to continue.' : '')
@@ -45,6 +46,18 @@ export default function LoginPage() {
       setError(err.message || 'Failed to login. Please check your credentials.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true)
+    setError('')
+    try {
+      const { error: oauthError } = await signInWithGoogle(searchParams.get('next'))
+      if (oauthError) throw oauthError
+    } catch (err: any) {
+      setError(err.message || 'Could not start Google sign-in. Please try again.')
+      setGoogleLoading(false)
     }
   }
 
@@ -82,7 +95,23 @@ export default function LoginPage() {
         )}
         {message && <div role="status" className="mt-6 rounded-2xl border border-black/10 bg-white p-3 text-sm leading-6 text-[#1d1d1f] dark:border-white/15 dark:bg-black dark:text-[#f5f5f7]">{message}</div>}
 
-        <form onSubmit={handleLogin} className="mt-7 space-y-5">
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading || loading}
+          className="mt-7 flex min-h-12 w-full items-center justify-center gap-3 rounded-full border border-black/15 bg-white px-5 py-3 text-sm font-medium text-[#1d1d1f] transition hover:bg-black/[0.03] disabled:cursor-wait disabled:opacity-50 dark:border-white/20 dark:bg-black dark:text-[#f5f5f7] dark:hover:bg-white/[0.05]"
+        >
+          <span aria-hidden="true" className="font-semibold text-[#4285f4]">G</span>
+          {googleLoading ? 'Connecting to Google…' : 'Continue with Google'}
+        </button>
+
+        <div className="my-5 flex items-center gap-4 text-xs text-[#86868b]" aria-hidden="true">
+          <span className="h-px flex-1 bg-black/10 dark:bg-white/15" />
+          <span>or sign in with email</span>
+          <span className="h-px flex-1 bg-black/10 dark:bg-white/15" />
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label htmlFor="login-email" className="mb-2 block text-sm font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">Email</label>
             <input
