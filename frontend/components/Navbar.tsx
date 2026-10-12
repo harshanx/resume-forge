@@ -59,7 +59,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-black/[0.06] bg-white/75 backdrop-blur-xl dark:border-white/[0.08] dark:bg-black/75">
-      <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-4 px-5 py-3 sm:px-8 md:flex-nowrap md:py-0">
+      <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-3 px-4 py-3 sm:px-8 md:flex-nowrap md:py-0">
         <Link href="/" className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]" aria-label="ResumeForge home">
           <span className="grid h-7 w-7 place-items-center rounded-lg border border-black/[0.08] bg-[#f5f5f7] dark:border-white/[0.1] dark:bg-[#161617]">
             <FileText className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -90,7 +90,7 @@ export default function Navbar() {
           {isAuthenticated && (
             <button type="button" onClick={handleLogout} disabled={isSigningOut} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-black/15 px-3 py-2 text-xs font-medium text-[#1d1d1f] transition hover:bg-black/[0.04] disabled:cursor-wait disabled:opacity-60 dark:border-white/20 dark:text-[#f5f5f7] dark:hover:bg-white/[0.05]">
               <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>{isSigningOut ? 'Signing out…' : 'Sign out'}</span>
+              <span className="hidden sm:inline">{isSigningOut ? 'Signing out…' : 'Sign out'}</span>
             </button>
           )}
         </div>

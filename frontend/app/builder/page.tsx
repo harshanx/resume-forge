@@ -385,8 +385,9 @@ export default function BuilderPage() {
       a.download = `${resumeData.personal.name.replace(/\s+/g, '_')}_Resume.pdf`
       document.body.appendChild(a)
       a.click()
-      window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
+      // Give mobile browsers time to start reading the blob before releasing it.
+      window.setTimeout(() => window.URL.revokeObjectURL(url), 1000)
     } catch (error) {
       console.error('Error downloading resume:', error)
       alert(`Failed to download resume: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -595,7 +596,7 @@ export default function BuilderPage() {
               <button
                 onClick={generatedPdf ? handleDownloadFromPreview : handleDownload}
                 disabled={isGenerating}
-                className="hidden min-h-10 items-center gap-2 rounded-full border border-black/15 px-4 py-2 text-sm font-medium text-[#1d1d1f] transition hover:bg-black/[0.04] disabled:opacity-50 dark:border-white/20 dark:text-[#f5f5f7] dark:hover:bg-white/[0.05] sm:flex"
+                className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2 text-sm font-medium text-[#1d1d1f] transition hover:bg-black/[0.04] disabled:opacity-50 dark:border-white/20 dark:text-[#f5f5f7] dark:hover:bg-white/[0.05] sm:flex-none"
               >
                 <Download className="h-4 w-4" />
                 <span>Download PDF</span>
@@ -717,7 +718,7 @@ export default function BuilderPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form Section */}
-          <div className="min-w-0 bg-white rounded-xl shadow-md p-6 relative z-10">
+          <div className="relative z-10 min-w-0 rounded-xl bg-white p-4 shadow-md sm:p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               {steps[currentStep - 1].title}
             </h2>
@@ -766,8 +767,20 @@ export default function BuilderPage() {
           </div>
 
           {/* Preview Section */}
-          <div className="min-w-0 bg-white rounded-xl shadow-md p-6 relative z-0">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Resume Preview</h2>
+          <div className="relative z-0 min-w-0 rounded-xl bg-white p-4 shadow-md sm:p-6">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-2xl font-bold text-gray-900">Resume Preview</h2>
+              {generatedPdf && (
+                <button
+                  type="button"
+                  onClick={handleDownloadFromPreview}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 sm:w-auto"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Download PDF</span>
+                </button>
+              )}
+            </div>
             {isGenerating ? (
               <div role="status" className="flex min-h-[320px] flex-col items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-800">
                 <Loader2 className="mb-3 h-8 w-8 animate-spin" />
@@ -778,7 +791,7 @@ export default function BuilderPage() {
               <iframe
                 title="Generated resume PDF preview"
                 src={generatedPdf}
-                className="h-[800px] w-full rounded-lg border"
+                className="h-[min(800px,75vh)] min-h-[420px] w-full rounded-lg border"
               />
             ) : (
               <ResumePreview data={resumeData} />

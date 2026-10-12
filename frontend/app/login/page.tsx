@@ -14,12 +14,17 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resending, setResending] = useState(false)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState(searchParams.get('confirmed') === '1' ? 'Email confirmed. Sign in to continue.' : '')
+  const [canResendConfirmation, setCanResendConfirmation] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setMessage('')
+    setCanResendConfirmation(false)
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -27,13 +32,37 @@ export default function LoginPage() {
         password,
       })
 
-      if (error) throw error
+      if (error) {
+        if (error.code === 'email_not_confirmed') {
+          setCanResendConfirmation(true)
+          throw new Error('Confirm your email address before signing in. You can send a new confirmation link below.')
+        }
+        throw error
+      }
 
       router.replace(getSafeReturnPath(searchParams.get('next')))
     } catch (err: any) {
       setError(err.message || 'Failed to login. Please check your credentials.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResendConfirmation = async () => {
+    if (!email.trim()) {
+      setError('Enter your email address first, then request a new confirmation link.')
+      return
+    }
+    setResending(true)
+    setError('')
+    try {
+      const { error: resendError } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+      if (resendError) throw resendError
+      setMessage('If this address has an account that needs confirmation, a new link is on its way.')
+    } catch (err: any) {
+      setError(err.message || 'Could not resend the confirmation email. Please try again.')
+    } finally {
+      setResending(false)
     }
   }
 
@@ -51,6 +80,7 @@ export default function LoginPage() {
             {error}
           </div>
         )}
+        {message && <div role="status" className="mt-6 rounded-2xl border border-black/10 bg-white p-3 text-sm leading-6 text-[#1d1d1f] dark:border-white/15 dark:bg-black dark:text-[#f5f5f7]">{message}</div>}
 
         <form onSubmit={handleLogin} className="mt-7 space-y-5">
           <div>
@@ -90,6 +120,8 @@ export default function LoginPage() {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+
+        {canResendConfirmation && <button type="button" onClick={handleResendConfirmation} disabled={resending} className="mt-4 min-h-11 w-full rounded-full border border-black/15 px-5 py-2 text-sm font-medium text-[#1d1d1f] disabled:opacity-50 dark:border-white/20 dark:text-[#f5f5f7]">{resending ? 'Sending link…' : 'Resend confirmation email'}</button>}
 
         <p className="mt-6 text-center text-sm text-[#6e6e73] dark:text-[#a1a1a6]">
           Don&apos;t have an account?{' '}

@@ -48,12 +48,8 @@ export default function Home() {
       <Navbar />
       <main>
         <section className="mx-auto max-w-6xl px-5 pb-20 pt-24 text-center sm:px-8 sm:pb-28 sm:pt-32">
-          <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-[#f5f5f7] px-3 py-1.5 text-xs font-medium tracking-[-0.01em] text-[#6e6e73] dark:border-white/[0.12] dark:bg-[#121212] dark:text-[#a1a1a6]">
-            <span className="h-1.5 w-1.5 rounded-full bg-black dark:bg-white" />
-            LaTeX Engine 2.0 <span className="text-[#86868b]">•</span> ATS Compliant <span className="text-[#86868b]">•</span> Single Page Guaranteed
-          </p>
-          <h1 className="mx-auto mt-7 max-w-4xl text-5xl font-semibold leading-[1.08] tracking-tight text-premium-gold sm:text-6xl md:text-7xl">A resume that gets out of your way.</h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[#6e6e73] md:text-xl dark:text-[#a1a1a6]">Turn your experience into a focused, ATS-ready resume. Built for clear thinking, quick tailoring, and a polished final PDF.</p>
+          <h1 className="mx-auto mt-7 max-w-4xl text-4xl font-semibold leading-[1.08] tracking-tight text-premium-gold sm:text-6xl md:text-7xl">A resume that gets out of your way.</h1>
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#6e6e73] sm:text-lg md:text-xl dark:text-[#a1a1a6]">Turn your experience into a focused, ATS-ready resume. Built for clear thinking, quick tailoring, and a polished final PDF.</p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/builder" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-black px-7 py-3 text-sm font-medium text-white transition-all hover:scale-[1.02] focus-visible:ring-black/30 active:scale-[0.98] dark:bg-white dark:text-black dark:focus-visible:ring-white/30">Create your resume <ArrowRight className="h-4 w-4" /></Link>
             <Link href="/job-analyzer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-black/15 px-7 py-3 text-sm font-medium text-[#1d1d1f] transition-colors hover:bg-black/[0.04] dark:border-white/20 dark:text-[#f5f5f7] dark:hover:bg-white/[0.05]">Analyze a job description</Link>
@@ -78,7 +74,7 @@ export default function Home() {
         </section>
 
         <section className="border-y border-black/[0.06] bg-[#f5f5f7]/70 py-20 dark:border-white/[0.08] dark:bg-[#121212]/70 sm:py-28" aria-labelledby="process-heading">
-          <div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="max-w-xl"><p className="text-sm font-medium text-[#6e6e73] dark:text-[#a1a1a6]">A quieter workflow</p><h2 id="process-heading" className="mt-3 text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">From draft to download in four steps.</h2></div>
+          <div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="max-w-xl"><p className="text-sm font-medium text-[#6e6e73] dark:text-[#a1a1a6]">A quieter workflow</p><h2 id="process-heading" className="mt-3 text-3xl font-semibold tracking-tight text-[#1d1d1f] sm:text-4xl dark:text-[#f5f5f7]">From draft to download in four steps.</h2></div>
             <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{steps.map(([number, title, description]) => <li key={number} className="rounded-3xl border border-black/[0.06] bg-white p-6 dark:border-white/[0.08] dark:bg-[#161617]"><span className="grid h-10 w-10 place-items-center rounded-xl border border-black/[0.08] bg-[#f5f5f7] text-xs font-semibold text-[#1d1d1f] dark:border-white/[0.1] dark:bg-[#121212] dark:text-[#f5f5f7]">{number}</span><h3 className="mt-8 text-lg font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">{title}</h3><p className="mt-2 text-sm leading-6 text-[#6e6e73] dark:text-[#a1a1a6]">{description}</p></li>)}</ol>
           </div>
         </section>

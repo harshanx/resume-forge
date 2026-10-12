@@ -216,8 +216,8 @@ We offer competitive salary, remote work options, and opportunities for growth.`
         </section>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Input Section */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="min-w-0 rounded-xl bg-white p-4 shadow-md sm:p-6">
+            <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
               <h2 className="text-2xl font-bold text-gray-900">Job Description</h2>
               <button
                 onClick={handleLoadDummy}
@@ -257,7 +257,7 @@ We offer competitive salary, remote work options, and opportunities for growth.`
               </div>
             )}
 
-            <div className="flex space-x-4 mt-4">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:gap-4">
               <button
                 onClick={handleAnalyze}
                 disabled={isAnalyzing}
@@ -298,7 +298,7 @@ We offer competitive salary, remote work options, and opportunities for growth.`
           </div>
 
           {/* Results Section */}
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="min-w-0 rounded-xl bg-white p-4 shadow-md sm:p-6">
             {analysis && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-gray-900">Job Analysis Results</h2>

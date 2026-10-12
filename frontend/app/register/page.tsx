@@ -16,6 +16,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [resending, setResending] = useState(false)
+  const [confirmationSent, setConfirmationSent] = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,11 +25,17 @@ export default function RegisterPage() {
     setError('')
 
     try {
+      const confirmationUrl = new URL('/login', window.location.origin)
+      confirmationUrl.searchParams.set('confirmed', '1')
+      const nextPath = searchParams.get('next')
+      if (nextPath) confirmationUrl.searchParams.set('next', nextPath)
+
       // Create user with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: confirmationUrl.toString(),
           data: {
             name,
           },
@@ -36,15 +44,31 @@ export default function RegisterPage() {
 
       if (error) throw error
 
-      if (data.session) {
+      if (data.user?.email_confirmed_at) {
         router.replace(getSafeReturnPath(searchParams.get('next')))
       } else {
-        setSuccess(`If ${email} can be registered, a confirmation link is on its way. Check your inbox to continue.`)
+        if (data.session) await supabase.auth.signOut()
+        setConfirmationSent(true)
+        setSuccess(`Check ${email} for your confirmation link. Once you confirm your email, come back here to sign in.`)
       }
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResendConfirmation = async () => {
+    setResending(true)
+    setError('')
+    try {
+      const { error: resendError } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+      if (resendError) throw resendError
+      setSuccess(`If ${email} still needs confirmation, a new link is on its way.`)
+    } catch (err: any) {
+      setError(err.message || 'Could not resend the confirmation email. Please try again.')
+    } finally {
+      setResending(false)
     }
   }
 
@@ -113,6 +137,8 @@ export default function RegisterPage() {
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
+
+        {confirmationSent && <button type="button" onClick={handleResendConfirmation} disabled={resending} className="mt-4 min-h-11 w-full rounded-full border border-black/15 px-5 py-2 text-sm font-medium text-[#1d1d1f] disabled:opacity-50 dark:border-white/20 dark:text-[#f5f5f7]">{resending ? 'Sending link…' : 'Resend confirmation email'}</button>}
 
         <p className="mt-6 text-center text-sm text-[#6e6e73] dark:text-[#a1a1a6]">
           Already have an account?{' '}
